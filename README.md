@@ -19,7 +19,30 @@ In order to play the game, you will need:
 Diagram
 
 ## Setup Requirements
-The following steps need to be taken to successfully get the project working:
+First download the following files: 
+- `clk_wiz_0.vhd`
+- `clk_wiz_0_clk_wiz.vhd`
+- `duck.vhd`
+- `duckhunt.vhd`
+- `duckhunt.xdc`
+- `leddec16.vhd`
+- `reticle.vhd`
+- `vga_sync.vhd`
+
+Then perform the following steps:
+1. Connect the micro USB cable to your computer and the USB port on Nexys A7 board
+2. Connect the VGA cable to the monitor and the VGA port on the Nexys A7 board
+3. Create a new RTL project on Vivado
+4. Add the downloaded `.vhd` files as source files to the project
+5. Add the downloaded `.xdc` file as a constraint file to the project
+6. Select the Nexys A7 board in the "Boards" section
+7. Run the synthesis
+8. Run the implementation
+9. Generate the bitstream
+10. Open the hardware manager, then click "Open Target" and "Autoconnect"
+11. Click "Program Device" and select xc7a100t_0 (the Nexys A7)
+
+After following these steps, the program should run on the VGA monitor.
 
 ## Inputs and Outputs
 The inputs and outputs of the game are as follows:
