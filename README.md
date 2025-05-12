@@ -1,7 +1,7 @@
 # Duck Hunt
 
 ## Project Overview
-The goal of this project was to create the iconic Duck Hunt game using the Nexys A7 board and a VGA monitor. The player navigates a reticle ball on the screen using the BTNU, BTNR, BTND, and BTNL buttons for horizontal and vertical movement. One ball, which is our duck, moves around the screen. When the player moves the reticle over the duck and presses the BTNC button, the duck is shot and the player gets a point. The points are shown on the right LED display. After about 10 seconds, the duck will respawn with faster movement. The player has 3 shots per duck, with the shot count displayed on the left LED display. If the player misses all 3 shots, the game is over. The duck and the reticle will both disapper. However, the player can hit the C12 button to restart the game.
+The goal of this project was to create the iconic Duck Hunt game using the Nexys A7 board and a VGA monitor. The player navigates a reticle ball on the screen using the BTNU, BTNR, BTND, and BTNL buttons for horizontal and vertical movement. One ball, which is our duck, moves around the screen. When the player moves the reticle over the duck and presses the BTNC button, the duck is shot and the player gets a point. The points are shown on the right LED display. After about 10 seconds, the duck will respawn with faster movement. The player has 3 shots per duck, with the shot count displayed on the left LED display. If the player misses all 3 shots, the game is over. The duck and the reticle will both disappear. However, the player can hit the C12 button to restart the game.
 
 ## Necessary Attachments
 In order to play the game, you will need:
@@ -58,7 +58,9 @@ entity duck is
         y_position : OUT STD_LOGIC_VECTOR(10 DOWNTO 0);
         draw_on : OUT STD_LOGIC;
         X_DIR : IN STD_LOGIC_VECTOR (10 DOWNTO 0);
-        hit : OUT STD_LOGIC
+        hit : OUT STD_LOGIC;
+        respawn: IN STD_LOGIC;
+        reset: IN STD_LOGIC
      );
 end duck;
 ```
@@ -70,6 +72,8 @@ end duck;
 - bat_y: The current y-position of the reticle
 - shoot: The input from pressing the BTNC (shoot) button
 - X_DIR: The initial x-position used to avoid the ducks spawning on top of one another
+- respawn: Respawns the next duck
+- reset: Resets the game
 
 **Outputs:**
 - x-position: The current x-position of the duck
@@ -93,7 +97,8 @@ ENTITY duckhunt IS
         btnu : IN STD_LOGIC;
         btnd : in STD_LOGIC;
         SEG7_anode : OUT STD_LOGIC_VECTOR (7 DOWNTO 0); -- anodes of four 7-seg displays
-        SEG7_seg : OUT STD_LOGIC_VECTOR (6 DOWNTO 0)
+        SEG7_seg : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
+        reset : in STD_LOGIC
     ); 
 END duckhunt;
 ```
@@ -104,6 +109,7 @@ END duckhunt;
 - btn0: The input from pressing the BTNC button, shoots the duck if the reticle if the reticle is on the duck
 - btnu: The input from pressing the BTNU button, moves the reticle upwards vertically
 - btnd: The input from pressing the BTND button, moves the reticle downwards vertically
+- reset: Resets the game
 
 **Outputs:**
 - VGA_red: The signal used for managing the red color displays for the VGA monitor
@@ -119,14 +125,14 @@ END duckhunt;
 ENTITY leddec16 IS
 	PORT (
 		dig : IN STD_LOGIC_VECTOR (2 DOWNTO 0); -- which digit to currently display
-		data : IN STD_LOGIC_VECTOR (15 DOWNTO 0); -- 16-bit (4-digit) data
+		data : IN STD_LOGIC_VECTOR (19 DOWNTO 0); -- 19-bit (4-digit) data
 		anode : OUT STD_LOGIC_VECTOR (7 DOWNTO 0); -- which anode to turn on
 		seg : OUT STD_LOGIC_VECTOR (6 DOWNTO 0)); -- segment code for current digit
 END leddec16;
 ```
 **Inputs:**
 - dig: Controls what digit the LED displays
-- data: The 16-bit or 4-digit data
+- data: The 19-bit or 4-digit data
 
 **Outputs:**
 - anode: Controls which anode to turn on
@@ -134,7 +140,7 @@ END leddec16;
 
 ### reticle.vhd
 ```
-ENTITY bat_n_ball IS
+ENTITY reticle IS
     PORT (
         v_sync : IN STD_LOGIC;
         pixel_row : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
@@ -146,18 +152,24 @@ ENTITY bat_n_ball IS
         red : OUT STD_LOGIC;
         green : OUT STD_LOGIC;
         blue : OUT STD_LOGIC;
-        SCORE : OUT STD_LOGIC_VECTOR (15 DOWNTO 0)
+        SCORE : OUT STD_LOGIC_VECTOR (15 DOWNTO 0);
+        clk : IN STD_LOGIC;
+        MISS : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        reset : IN STD_LOGIC
     );
-END bat_n_ball;
+END reticle;
+
 ```
 **Inputs:**
 - serve: Spawns in ducks
+- shoot: Registers if the duck has been shot
 
 **Outputs:**
 - red: The red color signal for the VGA monitor to display
 - green: The green color signal for the VGA monitor to display
 - blue: The blue color signal for the VGA monitor to display
 - SCORE: The signal for keeping track of the player's score
+-MISS: Registers if a shot has been missed
 
 ### vga_sync.vhd
 ```
@@ -178,7 +190,6 @@ ENTITY vga_sync IS
 END vga_sync;
 ```
 **Inputs:**
-- pixel_clk:
 - red_in: The input for the red color channel
 - green_in: The input for the green color channel
 - blue_in: The input for the blue color channel
