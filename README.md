@@ -1,7 +1,7 @@
 # Duck Hunt
 
 ## Project Overview
-The goal of this project was to create the iconic Duck Hunt game using the Nexys A7 board and a VGA monitor. The player navigates a reticle ball on the screen using the BTNU, BTNR, BTND, and BTNL buttons for horizontal and vertical movement. One or two duck balls move around the screen depending on which mode the player chooses. The player can decide whihc mode to play by flipping the _ switch for one duck or the _ switch for two ducks. When the player moves the reticle over the duck and presses the BTNC button, the duck is shot and the players get points. After a few seconds, the duck will respawn with faster movement.
+The goal of this project was to create the iconic Duck Hunt game using the Nexys A7 board and a VGA monitor. The player navigates a reticle ball on the screen using the BTNU, BTNR, BTND, and BTNL buttons for horizontal and vertical movement. One ball, which is our duck, moves around the screen. When the player moves the reticle over the duck and presses the BTNC button, the duck is shot and the player gets a point. The points are shown on the right LED display. After about 10 seconds, the duck will respawn with faster movement. The player has 3 shots per duck, with the shot count displayed on the left LED display. If the player misses all 3 shots, the game is over. The duck and the reticle will both disapper. However, the player can hit the C12 button to restart the game.
 
 ## Necessary Attachments
 In order to play the game, you will need:
@@ -14,9 +14,6 @@ In order to play the game, you will need:
 - Micro USB cable
   
 - Computer with Vivado installed
-
-## Block Diagram
-Diagram
 
 ## Setup Requirements
 First download the following files: 
@@ -197,3 +194,11 @@ END vga_sync;
 We began by modifying the pong code from Lab 6.
 
 ## Conclusion
+Thomas was responsible for debugging parts of the code (miss detection) and most of the README file. Jimmy was responsible for coding most of the project and parts of the README.
+
+<ins>Timeline</ins>
+- 4/22 - 4/24: Brainstormed ideas, began editing Lab 6 code with basic modifications (vertical movement buttons)
+- 4/29 - 5/01: Began more complex modifications of Lab 6 code (two balls on screen, ball respawning)
+- 5/06 - 5/12: Finished modifications and debugging (scoreboard, shot counter), updated github repository
+
+We encountered difficulties with the hit tracking and getting the score to work. The main issue we had with the hit tracking was that the tracker would not implement the number of hits properly (i.e. one hit would count as two). The hit tracker also had issues with correctly identifying a miss. To solve these issues, we used a state machine to identify when the shoot button was pressed to keep the hit detection window open for a clock cycle. The scoreboard had issues with properly adding the hits when they were performed due to improperly implementing when the score would update. We originally attempted to have two balls at once, but this caused issues with changing the score values when two hits and score updates happened at once. To resolve this problem, we chose to only implement one ball. With the one ball, we converted the score into an unsigned and then updated it. After that, we converted it back into a std_logic_vector so that it could be displayed on the board.
