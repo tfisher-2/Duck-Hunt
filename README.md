@@ -203,6 +203,152 @@ END vga_sync;
 
 ## Modifications
 We began by modifying the pong code from Lab 6.
+## Modifications
+
+We got the framework of our project from Lab 6, the PONG project. Some functionality remained unchanged, like the motion of each ball, which we are now calling ducks, and the horizontal motion of the reticle. vga_sync.vhd, clk_wiz_0.vhd and clk_wiz_0_clk_wiz.vhd remained completely unchanged, with some minor modifications being made to leddec16.vhd, and major modifications to duckhunt.vhd (formerly pong.vhd), reticle.vhd (formerly bat_n_ball.vhd), and the new duck.vhd files.
+
+### duckhunt.vhd changes
+Vertical Movement
+```
+pos : PROCESS (clk_in) is
+    BEGIN
+        if rising_edge(clk_in) then
+            count <= count + 1;
+            IF (btnl = '1' and count = 0 and batpos_x > 0) THEN
+                batpos_x <= batpos_x - 10;
+            ELSIF (btnr = '1' and count = 0 and batpos_x < 800) THEN
+                batpos_x <= batpos_x + 10;
+            END IF;
+            
+            IF (btnu = '1' and count = 0 and batpos_y > 10) then
+                batpos_y <= batpos_y - 10;
+            ELSIF (btnd = '1' and count = 0 and batpos_y < 600) then
+                batpos_y <= batpos_y + 10;
+            END IF;
+            
+            
+        end if;
+    END PROCESS;
+```
+
+Here we took the existing code for moving the reticle right and left, and now added new conditions that allow us to move the reticle up and down with BTNU, and BTND.
+
+leddec16 portmap
+```
+    PORT MAP(
+      dig => led_mpx, data => "00"& miss& display, 
+      anode => SEG7_anode, seg => SEG7_seg
+    );
+```
+We needed to modify our port map as part of our project uses the first 4 digits of the 7 segment display to show the users score, and then the final digit to display how many shots the user has remaining. 
+```
+data => display 
+```
+was changed to
+``` 
+data => "00"& miss& display
+``` 
+This now passes the value of miss along with the rest of display, which is the user’s score.
+
+
+### reticle.vhd changes
+```
+ ck_process: PROCESS(v_sync)
+    BEGIN
+        if rising_edge(v_sync) then
+        SCORE <= localScore;
+        game_state <= nx_game_state;
+        MISS <= shot_count;
+        END IF;
+    END PROCESS;
+```
+Simple clocked process that is synchronized with v_sync to update the states of various states and outputs.
+```
+
+counter: PROCESS(clk)
+    begin
+        IF counterEnable = '1' then
+            IF clk'EVENT and CLK = '1' then
+                count <= count + 1;
+            END IF;
+        else
+            count <= conv_std_logic_vector(0,32);
+        END IF;
+    END process;
+```
+Counter process, this is responsible for creating the delay between levels. 
+
+```
+gameManager: PROCESS(draw_on,counterFinished,v_sync)
+    
+    begin
+    if rising_edge(v_sync) then
+    nx_game_state <= game_state;
+    
+    IF game_state = ENABLE THEN
+       IF draw_on = '0' then
+       counterEnable <= '1';
+        nx_game_state <= DISABLE;
+       else
+       counterEnable <= '0';
+       respawn <= '0';
+       END IF;
+     ELSE --game_state = DISABLE
+       IF counterFinished = '1' THEN
+          counterEnable <= '0';
+          nx_game_state <= ENABLE;
+          respawn <= '1';
+       ELSE
+       counterEnable <= '1';
+       END IF;
+    END IF;
+    END IF;
+    
+    
+    IF shot_count = "00" THEN
+        nx_game_state <= DISABLE;
+        respawn <= '0';
+    END IF;
+    END PROCESS;
+```
+The gameManager process controls how the duck respawns for the next level, and also shuts down the game in the event of a game over.
+
+```
+   scoreupdate: PROCESS IS
+        variable temp_score : unsigned(15 DOWNTO 0);
+        variable hit_detected : STD_LOGIC;
+    BEGIN
+        wait until rising_edge(v_sync);
+        if reset = '0' THEN
+        shot_count <= "11";
+        localScore <= conv_std_logic_vector(0,16);
+        ELSE
+        temp_score := unsigned(localScore);
+        hit_detected := '0';
+            IF HITS = '1' THEN
+                IF HIT_FLAGS = '0' THEN
+                temp_score := temp_score + 1;
+                hit_detected := '1';
+                shot_count <= "11";
+                HIT_FLAGS <= '1';
+                END IF;
+            ELSE 
+                HIT_FLAGS <= '0';
+                END IF;
+            localScore <= STD_LOGIC_VECTOR(temp_score);
+            IF shoot = '1' and prev_shoot = '0' THEN
+                IF HITS = '0' THEN
+                    IF shot_count = "00" THEN
+                    ELSE
+                    shot_count <= shot_count - 1;
+                    END IF;
+                    END IF;
+                END IF;
+        prev_shoot <= shoot;
+        END IF;
+    END PROCESS;
+```
+This is the scoreUpdate process, this is where shoot inputs are tested to see if they were a hit or a miss and adjusts the game score or shot counter accordingly. It is also responsible for resetting the game when the reset button is pressed.
 
 ## Conclusion
 Thomas was responsible for debugging parts of the code (miss detection) and most of the README file. Jimmy was responsible for coding most of the project and parts of the README.
@@ -213,3 +359,6 @@ Thomas was responsible for debugging parts of the code (miss detection) and most
 - 5/06 - 5/12: Finished modifications and debugging (scoreboard, shot counter), updated github repository
 
 We encountered difficulties with the hit tracking and getting the score to work. The main issue we had with the hit tracking was that the tracker would not implement the number of hits properly (i.e. one hit would count as two). The hit tracker also had issues with correctly identifying a miss. To solve these issues, we used a state machine to identify when the shoot button was pressed to keep the hit detection window open for a clock cycle. The scoreboard had issues with properly adding the hits when they were performed due to improperly implementing when the score would update. We originally attempted to have two balls at once, but this caused issues with changing the score values when two hits and score updates happened at once. To resolve this problem, we chose to only implement one ball. With the one ball, we converted the score into an unsigned and then updated it. After that, we converted it back into a std_logic_vector so that it could be displayed on the board.
+
+
+
