@@ -1,6 +1,9 @@
 # Duck Hunt
+![image](https://github.com/user-attachments/assets/7abffee2-576f-4241-9787-be799702e7b7)
 
 ## Project Overview
+![image](https://github.com/user-attachments/assets/21375510-a9f8-4db0-9e80-dba3df2c94c5)
+
 The goal of this project was to create the iconic Duck Hunt game using the Nexys A7 board and a VGA monitor. The player navigates a reticle ball on the screen using the BTNU, BTNR, BTND, and BTNL buttons for horizontal and vertical movement. One ball, which is our duck, moves around the screen. When the player moves the reticle over the duck and presses the BTNC button, the duck is shot and the player gets a point. The points are shown on the right LED display. After about 10 seconds, the duck will respawn with faster movement. The player has 3 shots per duck, with the shot count displayed on the left LED display. If the player misses all 3 shots, the game is over. The duck and the reticle will both disappear. However, the player can hit the C12 button to restart the game.
 
 ## Necessary Attachments
