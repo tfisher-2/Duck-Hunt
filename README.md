@@ -202,8 +202,6 @@ END vga_sync;
 - vsync: The vertical sync signal
 
 ## Modifications
-We began by modifying the pong code from Lab 6.
-## Modifications
 
 We got the framework of our project from Lab 6, the PONG project. Some functionality remained unchanged, like the motion of each ball, which we are now calling ducks, and the horizontal motion of the reticle. vga_sync.vhd, clk_wiz_0.vhd and clk_wiz_0_clk_wiz.vhd remained completely unchanged, with some minor modifications being made to leddec16.vhd, and major modifications to duckhunt.vhd (formerly pong.vhd), reticle.vhd (formerly bat_n_ball.vhd), and the new duck.vhd files.
 
