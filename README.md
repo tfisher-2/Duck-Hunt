@@ -351,6 +351,104 @@ The gameManager process controls how the duck respawns for the next level, and a
 ```
 This is the scoreUpdate process, this is where shoot inputs are tested to see if they were a hit or a miss and adjusts the game score or shot counter accordingly. It is also responsible for resetting the game when the reset button is pressed.
 
+### leddec16.vhd changes
+leddec16 architecture
+```
+ARCHITECTURE Behavioral OF leddec16 IS
+	SIGNAL data4 : STD_LOGIC_VECTOR (3 DOWNTO 0); -- binary value of current digit
+BEGIN
+	-- Select digit data to be displayed in this mpx period
+	data4 <= data(3 DOWNTO 0) WHEN dig = "000" ELSE -- digit 0
+	         data(7 DOWNTO 4) WHEN dig = "001" ELSE -- digit 1
+	         data(11 DOWNTO 8) WHEN dig = "010" ELSE -- digit 2
+	         data(15 DOWNTO 12) WHEN dig ="011" ELSE-- digit 3
+	         data(19 DOWNTO 16);
+	-- Turn on segments corresponding to 4-bit data word
+	seg <= "0000001" WHEN data4 = "0000" ELSE -- 0
+	       "1001111" WHEN data4 = "0001" ELSE -- 1
+	       "0010010" WHEN data4 = "0010" ELSE -- 2
+	       "0000110" WHEN data4 = "0011" ELSE -- 3
+	       "1001100" WHEN data4 = "0100" ELSE -- 4
+	       "0100100" WHEN data4 = "0101" ELSE -- 5
+	       "0100000" WHEN data4 = "0110" ELSE -- 6
+	       "0001111" WHEN data4 = "0111" ELSE -- 7
+	       "0000000" WHEN data4 = "1000" ELSE -- 8
+	       "0000100" WHEN data4 = "1001" ELSE -- 9
+	       "0001000" WHEN data4 = "1010" ELSE -- A
+	       "1100000" WHEN data4 = "1011" ELSE -- B
+	       "0110001" WHEN data4 = "1100" ELSE -- C
+	       "1000010" WHEN data4 = "1101" ELSE -- D
+	       "0110000" WHEN data4 = "1110" ELSE -- E
+	       "0111000" WHEN data4 = "1111" ELSE -- F
+	       "1111111";
+	-- Turn on anode of 7-segment display addressed by 3-bit digit selector dig
+	anode <= "11111110" WHEN dig = "000" ELSE -- 0
+	         "11111101" WHEN dig = "001" ELSE -- 1
+	         "11111011" WHEN dig = "010" ELSE -- 2
+	         "11110111" WHEN dig = "011" ELSE -- 3
+	      --   "11101111" WHEN dig = "100" ELSE -- 4
+	      --   "11011111" WHEN dig = "101" ELSE -- 5
+	      --"10111111" WHEN dig = "110" ELSE -- 6
+	         "01111111" WHEN dig = "111" ELSE -- 7
+	         "11111111";
+END Behavioral;
+```
+
+Here inside the architecture for leddec16 we changed the data4 selection to allow for data(19 DOWNTO 6) when the dig is others, to allow us to display the shot counter on the last digit of the display. Additionally we needed to uncomment the line corresponding to the last digit in the annode select to enable the last digit of the display.
+
+### duck.vhd changes
+
+```
+ck_process : process(v_sync)
+    
+    begin
+    hit <= nx_hit;
+    shot_state <= nx_shot_state;
+    ball_speed <= nx_speed;
+    end process;
+```
+Clock process to update signals to their next value based on the clock cycle
+
+```
+ hitDected : process
+    
+    BEGIN
+    IF reset = '0' THEN
+        game_on <= '1';
+        nx_speed <= CONV_STD_LOGIC_VECTOR (2, 11);
+        ELSE
+        IF respawn = '1' THEN
+        game_on <= '1';
+        nx_hit <= '0';
+        ELSE
+        WAIT UNTIL rising_edge(v_sync);
+        nx_speed <= ball_speed;
+        nx_shot_state <= shot_state;
+        IF shot_state = NOT_PRESSED THEN
+            IF shoot = '1' THEN
+                IF (ball_x + bsize/2) >= (bat_x - bat_w) AND
+                (ball_x - bsize/2) <= (bat_x + bat_w) AND
+                (ball_y + bsize/2) >= (bat_y - bat_h) AND
+                (ball_y - bsize/2) <= (bat_y + bat_h) THEN
+                    game_on <= '0';
+                    nx_hit <= '1';
+                    nx_speed <= ball_speed + 1;
+                    END IF;
+                nx_shot_state <= PRESSED;
+            END IF;
+        else
+            IF shoot = '0' THEN
+                nx_shot_state <= NOT_PRESSED;
+            ELSE
+                nx_shot_state <= PRESSED;
+                END IF;
+        END IF;
+        END IF;
+        END IF;
+    END PROCESS;
+```
+Hit detection process, it first checks if the game is being reset or if the ball is being respawned, if it isnt then it checks of the ball is inside of the reticle when the shoot button is pressed. If it is a hit is registered.
+
 ## Conclusion
 Thomas was responsible for debugging parts of the code (miss detection) and most of the README file. Jimmy was responsible for coding most of the project and parts of the README.
 
