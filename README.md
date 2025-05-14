@@ -52,6 +52,9 @@ Then perform the following steps:
 11. Click "Program Device" and select xc7a100t_0 (the Nexys A7)
 
 After following these steps, the program should run on the VGA monitor.
+## Block Diagram
+
+![./media/DSDBlockDiagram.jpg]
 
 ## Inputs and Outputs
 The inputs and outputs of the game are as follows:
