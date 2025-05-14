@@ -54,7 +54,7 @@ Then perform the following steps:
 After following these steps, the program should run on the VGA monitor.
 ## Block Diagram
 
-![./media/DSDBlockDiagram.jpg]
+![](./media/DSDBlockDiagram.jpg)
 
 ## Inputs and Outputs
 The inputs and outputs of the game are as follows:
