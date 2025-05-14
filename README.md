@@ -1,22 +1,27 @@
 # Duck Hunt
-![image](https://github.com/user-attachments/assets/7abffee2-576f-4241-9787-be799702e7b7)
+<img src="https://github.com/user-attachments/assets/7abffee2-576f-4241-9787-be799702e7b7" width="800" />
 
 ## Project Overview
-![image](https://github.com/user-attachments/assets/21375510-a9f8-4db0-9e80-dba3df2c94c5)
+<img src="https://github.com/user-attachments/assets/21375510-a9f8-4db0-9e80-dba3df2c94c5" width="500" />
 
 The goal of this project was to create the iconic Duck Hunt game using the Nexys A7 board and a VGA monitor. The player navigates a reticle ball on the screen using the BTNU, BTNR, BTND, and BTNL buttons for horizontal and vertical movement. One ball, which is our duck, moves around the screen. When the player moves the reticle over the duck and presses the BTNC button, the duck is shot and the player gets a point. The points are shown on the right LED display. After about 10 seconds, the duck will respawn with faster movement. The player has 3 shots per duck, with the shot count displayed on the left LED display. If the player misses all 3 shots, the game is over. The duck and the reticle will both disappear. However, the player can hit the C12 button to restart the game.
 
 ## Necessary Attachments
 In order to play the game, you will need:
 - Nexys A7 Board
-  
+<img src="https://github.com/user-attachments/assets/8979fb36-ba38-44a6-9613-283e15bbc157" width="500" />
+
 - VGA Cable
-  
+<img src="https://github.com/user-attachments/assets/6eee019c-604e-4399-8062-944f078882f7" width="500" />
+
 - Monitor with VGA port or port that can utilize a VGA adapter
-  
+<img src="https://github.com/user-attachments/assets/a825ff81-97b6-4ad4-9dc6-1e04f05af86f" width="500" />
+
 - Micro USB cable
+<img src="https://github.com/user-attachments/assets/da1721a4-3f5c-4a0f-975d-794672c0838c" width="500" />
   
 - Computer with Vivado installed
+
 
 ## Setup Requirements
 First download the following files: 
